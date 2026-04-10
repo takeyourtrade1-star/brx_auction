@@ -1,0 +1,33 @@
+# FastAPI & server
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+gunicorn>=21.0.0
+
+# Validation
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+email-validator>=2.1.0
+
+# Database (PostgreSQL async + sync for Alembic)
+sqlalchemy[asyncio]>=2.0.25
+asyncpg>=0.29.0
+psycopg2-binary>=2.9.9
+alembic>=1.13.0
+
+# Redis (async)
+redis>=5.0.0
+
+# HTTP client
+httpx>=0.26.0
+
+# JWT (RS256)
+pyjwt[crypto]>=2.8.0
+cryptography>=42.0.0
+
+# Rate limiting: in-app async Redis (see app.core.rate_limit), no separate lib
+
+# Logging
+loguru>=0.7.2
+
+# Security / CORS
+python-multipart>=0.0.6
