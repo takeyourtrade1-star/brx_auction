@@ -4,6 +4,7 @@ Product repository: async CRUD and search. Uses AsyncSession.
 from typing import Optional
 from uuid import UUID
 
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,28 +12,48 @@ from app.core.config import get_settings
 from app.models.product import Product
 
 
+class ProductCreateDTO(BaseModel):
+    """DTO for creating a product. Pydantic validates field types."""
+
+    model_config = ConfigDict(validate_assignment=True)
+
+    name: str
+    created_by_user_id: UUID
+    description: str = ""
+    price: float = 0.0
+    image_front: str = ""
+    image_back: str = ""
+    condition: str = ""
+
+
 class ProductRepository:
+    """
+    Repository for Product entity: create, lookup, and search.
+
+    Uses Pydantic DTOs for create payloads to keep signatures stable and typed.
+    """
+
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def create(
-        self,
-        name: str,
-        description: str = "",
-        price: float = 0.0,
-        image_front: str = "",
-        image_back: str = "",
-        condition: str = "",
-        created_by_user_id: UUID,
-    ) -> Product:
+    async def create(self, dto: ProductCreateDTO) -> Product:
+        """
+        Persist a new product from a validated DTO.
+
+        Args:
+            dto: Required name and owner; optional description, price, images, condition.
+
+        Returns:
+            The flushed and refreshed Product row.
+        """
         product = Product(
-            name=name,
-            description=description,
-            price=price,
-            image_front=image_front,
-            image_back=image_back,
-            condition=condition,
-            created_by_user_id=created_by_user_id,
+            name=dto.name,
+            description=dto.description,
+            price=dto.price,
+            image_front=dto.image_front,
+            image_back=dto.image_back,
+            condition=dto.condition,
+            created_by_user_id=dto.created_by_user_id,
         )
         self._session.add(product)
         await self._session.flush()
@@ -40,6 +61,7 @@ class ProductRepository:
         return product
 
     async def find_by_id(self, id: int) -> Optional[Product]:
+        """Return the product with the given primary key, or None."""
         result = await self._session.execute(select(Product).where(Product.id == id))
         return result.scalar_one_or_none()
 

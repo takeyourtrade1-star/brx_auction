@@ -7,7 +7,7 @@ from typing import Any, Optional, Union
 from uuid import UUID
 
 from app.core.cache import get_cached, loading_lock, set_cached
-from app.repositories.product_repository import ProductRepository
+from app.repositories.product_repository import ProductCreateDTO, ProductRepository
 
 
 class ProductService:
@@ -62,22 +62,24 @@ class ProductService:
     async def create_product(
         self,
         name: str,
+        created_by_user_id: UUID,
         description: str = "",
         price: Union[Decimal, float] = 0,
         image_front: str = "",
         image_back: str = "",
         condition: str = "",
-        created_by_user_id: UUID,
     ) -> dict[str, Any]:
         _price = float(price) if isinstance(price, Decimal) else price
         product = await self._product_repo.create(
-            name=name,
-            description=description,
-            price=_price,
-            image_front=image_front,
-            image_back=image_back,
-            condition=condition,
-            created_by_user_id=created_by_user_id,
+            ProductCreateDTO(
+                name=name,
+                description=description,
+                price=_price,
+                image_front=image_front,
+                image_back=image_back,
+                condition=condition,
+                created_by_user_id=created_by_user_id,
+            )
         )
         return {
             "id": product.id,

@@ -9,7 +9,7 @@ from typing import Any, Optional
 from app.models.auction import Auction
 from app.core.cache import get_cached, invalidate_cached, loading_lock, set_cached
 from app.repositories.auction_repository import AuctionRepository
-from app.repositories.product_repository import ProductRepository
+from app.repositories.product_repository import ProductCreateDTO, ProductRepository
 from app.services.auction_domain import (
     _to_datetime,
     auction_to_dict,
@@ -99,13 +99,15 @@ class AuctionService:
             # Create product inline (price from auction, so product price = 0); images required at auction level
             p = product_inline
             new_product = await self._product_repo.create(
-                name=p["name"],
-                description=p.get("description", ""),
-                price=0.0,
-                image_front=p["image_front"],
-                image_back=p["image_back"],
-                condition=p.get("condition", ""),
-                created_by_user_id=data["created_by_user_id"],
+                ProductCreateDTO(
+                    name=p["name"],
+                    description=p.get("description", ""),
+                    price=0.0,
+                    image_front=p["image_front"],
+                    image_back=p["image_back"],
+                    condition=p.get("condition", ""),
+                    created_by_user_id=data["created_by_user_id"],
+                )
             )
             resolved_product_id = str(new_product.id)
             image_front = data["image_front"]
