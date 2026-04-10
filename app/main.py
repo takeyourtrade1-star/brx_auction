@@ -15,7 +15,7 @@ from app.core.config import get_settings
 from app.infrastructure.database import init_db, close_db, check_db_connected
 from app.infrastructure.http_client import init_http_client, close_http_client
 from app.infrastructure.redis_client import init_redis, close_redis, check_redis_connected
-from app.utils.error_handlers import base_exception_handler, global_exception_handler
+from app.utils.error_handlers import global_exception_handler
 from app.utils.request_id import request_id_middleware
 
 settings = get_settings()
@@ -72,9 +72,8 @@ async def security_headers_middleware(request: Request, call_next):
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     return response
 
-# Exception handlers: Exception first (more specific), then BaseException for the rest
+# Exception handlers: catches all Exception subclasses (FastAPI does not register BaseException)
 app.add_exception_handler(Exception, global_exception_handler)
-app.add_exception_handler(BaseException, base_exception_handler)
 
 # Routers
 app.include_router(me_router, tags=["auth"])
